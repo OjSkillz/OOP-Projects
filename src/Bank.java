@@ -16,8 +16,9 @@ public class Bank {
 
     public void createNewAccount(String accountName, String bvn, String pin){
         Account newAccount = new Account();
-        newAccount.setName(accountName);
+        checkUniquenessOfAccount(accountName, pin);
         validateBvn(bvn);
+        newAccount.setName(accountName);
         newAccount.setBvn(bvn);
         newAccount.setPin(pin);
         newAccount.setAccountNumber();
@@ -25,47 +26,29 @@ public class Bank {
     }
 
     public void deposit(long accountNumber, double amount){
-        boolean match = false;
+
         if (amount <= 0.0) throw new IllegalArgumentException("Deposit Amount must be greater than #0.00!");
-        for (Account account : accounts) {
-            if (account.getAccountNumber() == accountNumber) {
-                match = true;
-                account.deposit(amount);
-            }
-        } if (match == false) {
-            throw new IllegalArgumentException("Invalid Account Number!");
-        }
+        findAccount(accountNumber).deposit(amount);
     }
 
+
     public void withdraw(long accountNumber, double amount, String pin) {
-        boolean match = false;
+
         if (amount <= 0.0) throw new IllegalArgumentException("Withdrawal Amount must be greater than #0.00!");
-        for (Account account : accounts) {
-            if (account.getAccountNumber() == accountNumber && account.getPin().equals(pin)) {
-                match = true;
-                account.withdraw(amount);
-            }
-        } if (match == false) {
-            throw new IllegalArgumentException("Invalid Credentials. Check Account Number or Pin!");
-        }
+        findAccount(accountNumber, pin).withdraw(amount);
 
     }
 
     public void transfer(long sourceAccountNumber, long destinationAccountNumber, double amount, String pin){
-        withdraw(sourceAccountNumber, amount, pin);
-        deposit(destinationAccountNumber, amount);
-
         if (sourceAccountNumber == destinationAccountNumber) {
             throw new IllegalArgumentException("Source and Destination Accounts Cannot Be Same!");
         }
+        withdraw(sourceAccountNumber, amount, pin);
+        deposit(destinationAccountNumber, amount);
     }
 
     public int getNumberOfAccounts(){
-     int numberOfAccounts = 0;
-        for (Account account : accounts) {
-         numberOfAccounts++;
-     }
-        return numberOfAccounts;
+     return accounts.size();
     }
 
     public long getAccountNumber(String accountName, String pin) {
@@ -80,14 +63,14 @@ public class Bank {
     }
 
     public double displayBalance(long accountNumber, String pin) {
-        double balance = 0;
-        for (Account account : accounts) {
-            if (account.getAccountNumber() == accountNumber && account.getPin().equals(pin)) {
-              balance = account.getBalance();
-            }
-        }
+        double balance = findAccount(accountNumber, pin).getBalance();
+
         return balance;
     }
+
+    public void closeAccount(long accountNumber, String pin) {
+                accounts.remove(findAccount(accountNumber, pin));
+            }
 
     public void validateBvn(String bvn) {
         for (Account account : accounts) {
@@ -95,6 +78,31 @@ public class Bank {
                 throw new IllegalArgumentException("BVN already registered to another account!");
             }
         }
+    }
+
+    public void checkUniquenessOfAccount(String accountName, String pin) {
+            if (findAccount(accountName, pin)) throw new IllegalArgumentException("Account Details Already Registered To Another Customer");
+    }
+
+    public Account findAccount(long accountNumber, String pin) {
+        for (Account account1 : accounts) {
+            if (account1.getAccountNumber() == accountNumber && account1.getPin().equals(pin)) return account1;
+        }
+        throw new IllegalArgumentException("Invalid Credentials! Try again later..");
+    }
+
+    public Account findAccount(long accountNumber) {
+        for (Account account1 : accounts) {
+            if (account1.getAccountNumber() == accountNumber) return account1;
+        }
+        throw new IllegalArgumentException("Invalid Account Details! Try again later..");
+    }
+
+    public boolean findAccount(String accountName, String pin) {
+        for (Account account: accounts) {
+            if (account.getName().equals(accountName) && account.getPin().equals(pin)) return true;
+        }
+        return false;
     }
 
 

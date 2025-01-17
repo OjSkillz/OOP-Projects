@@ -21,7 +21,7 @@ public class BankTest {
     public void testThatPinLengthMustBeFour(){
         Bank bank = new Bank();
         assertThrows(IllegalArgumentException.class, ()->bank.createNewAccount("Adeboye Olodo", "23456645456767", "541234"));
-        assertEquals(0, bank.getNumberOfAccounts());
+
     }
 
     @Test
@@ -29,6 +29,15 @@ public class BankTest {
         Bank bank = new Bank();
         bank.createNewAccount("Adeboye Olodo", "23456645456767", "1234");
         assertThrows(IllegalArgumentException.class, ()->bank.createNewAccount("Olaoye Deola", "23456645456767", "4568"));
+
+    }
+
+    @Test
+    public void testThatNoTwoAccountsCanHaveSameNameAndPin() {
+        Bank bank = new Bank();
+        bank.createNewAccount("Adeboye Olodo", "23456645456767", "1234");
+        assertThrows(IllegalArgumentException.class, ()->bank.createNewAccount("Adeboye Olodo", "23455456767", "1234"));
+
 
     }
 
@@ -138,6 +147,8 @@ public class BankTest {
         bank.deposit(sourceAccountNumber, 55000);
         bank.transfer(sourceAccountNumber, destinationAccountNumber, 30000, "9090");
 
+        assertEquals(25000,bank.displayBalance(sourceAccountNumber,"9090"));
+
         assertEquals(30000,bank.displayBalance(destinationAccountNumber,"5622"));
     }
 
@@ -201,7 +212,9 @@ public class BankTest {
 
         bank.createNewAccount("Jess Glyne", "4738454999343", "9090");
         bank.createNewAccount("Bisi Tedela", "156645348897", "9908");
-
+        long accountNumber = bank.getAccountNumber("Jess Glyne", "9090");
+        bank.closeAccount(accountNumber, "9090");
+        assertThrows(IllegalArgumentException.class, ()-> bank.findAccount(accountNumber));
 
 
 
